@@ -1,9 +1,3 @@
-"""
-Dublin residential area recommender - core logic.
-
-Ported from "Backend/Recommendation system.ipynb" so it can run behind a web API.
-The data is loaded once when the server starts; recommend() is called per request.
-"""
 import os
 import re
 from pathlib import Path
@@ -11,7 +5,6 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-# Data folder: <repo>/Data by default, or set the DATA_DIR environment variable.
 DATA_DIR = Path(os.environ.get("DATA_DIR", Path(__file__).resolve().parents[1] / "Data"))
 
 AREAS = ["D1", "D2", "D3", "D6", "D7", "D8", "D9", "D10"]
@@ -35,7 +28,6 @@ FACTORS = [
 FACTOR_LOOKUP = {f["name"]: f for f in FACTORS}
 
 RATING_LABELS = {1: "Very important", 2: "Important", 3: "Slightly important", 4: "Not important"}
-# 1 = Very important gets the most weight; 4 = Not important contributes nothing.
 RATING_TO_WEIGHT = {1: 3, 2: 2, 3: 1, 4: 0}
 
 
@@ -62,8 +54,18 @@ def _minutes(value):
 def load_data(data_dir=DATA_DIR):
     d = Path(data_dir)
 
-    commute = _clean(pd.read_excel(d / "TUD G.xlsx"))
-    commute["Commute Minutes"] = commute["Commute time"].apply(_minutes)
+    if (d / "TUD G.xlsx").exists():
+        commute = _clean(pd.read_excel(d / "TUD G.xlsx"))
+        commute["Commute Minutes"] = commute["Commute time"].apply(_minutes)
+    else:
+        raw = _clean(pd.read_csv(d / "Commute_TUD_Grangegorman.csv"))
+        commute = (raw.groupby("District")
+                      .agg(**{"Commute Minutes": ("Travel_Time_Min", "mean"),
+                              "Distance_km": ("Distance_km", "mean")})
+                      .reset_index().rename(columns={"District": "Area"}))
+        commute["University"] = UNIVERSITY_NAME
+        commute["Commute Minutes"] = commute["Commute Minutes"].round()
+        commute["Distance"] = commute["Distance_km"].round(1).astype(str) + " km"
     commute = commute[["Area", "University", "Commute Minutes", "Distance"]]
 
     amenities = pd.concat([_clean(pd.read_csv(d / f"{a}_Amenities_Counts.csv")) for a in AREAS], ignore_index=True)
@@ -81,7 +83,7 @@ def load_data(data_dir=DATA_DIR):
     ethnicity = _clean(pd.read_excel(d / "Dublin_Ethnicity_D1_D24.xlsx"))
 
     rent_tables = {
-        # Room data: double = Shared Room, single = Private Room (same as the notebook)
+        # Room data: double = Shared Room, single = Private Room
         "shared_room":  ("Shared Room",           room_data[room_data["Room type"] == "double"].groupby("Area")["Rent"].mean()),
         "private_room": ("Private Room",          room_data[room_data["Room type"] == "single"].groupby("Area")["Rent"].mean()),
         "one_bed":      ("One Bedroom Apartment", rtb[bedrooms == "one bed"].groupby("Area")["VALUE"].mean()),
@@ -160,7 +162,7 @@ def _explain(position, row, ranked, averages, ctx):
     lines, n = [], len(ranked)
 
     good = [nm for nm in active if _better_or_worse(nm, row, averages) == 1]
-    good.sort(key=lambda nm: ratings[nm])            # most important first
+    good.sort(key=lambda nm: ratings[nm])
     good = good[:3]
     if good:
         sentence = f"{row['Area']} " + _join([_good_phrase(nm, row, ranked, acc_name) for nm in good])
@@ -275,7 +277,6 @@ def recommend(data, budget, accommodation, ratings, top_n=3):
             missing.append("commute time")
         return "No data for " + " and ".join(missing)
 
-    # Only list excluded areas we actually collected data for (skip D4, D5, D11...)
     excluded_list = [{"area": r["Area"], "reason": missing_reason(r)}
                      for _, r in excluded.iterrows() if r["Area"] in AREAS]
 
