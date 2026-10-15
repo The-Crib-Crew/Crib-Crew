@@ -136,15 +136,15 @@ def good_phrase(name, row, ranked, acc_name):
     value = row[col]
     if f["kind"] == "commute":
         if value == ranked[col].min():
-            return f"is the closest to {UNIVERSITY_NAME} (only {value:.0f} minutes away)"
-        return f"has a short commute to {UNIVERSITY_NAME} (about {value:.0f} minutes)"
+            return f"is the closest to {UNIVERSITY_NAME} only {value:.0f} minutes away"
+        return f"has a short commute to {UNIVERSITY_NAME} about {value:.0f} minutes"
     if f["kind"] == "rent":
         if value == ranked[col].min():
-            return f"is the cheapest area for a {acc_name.lower()} (€{value:,.0f} a month)"
-        return f"has lower rent than most areas (€{value:,.0f} a month)"
+            return f"is the cheapest area for a {acc_name.lower()}, €{value:,.0f} a month"
+        return f"has lower rent than most areas, €{value:,.0f} a month"
     if value == ranked[col].max():
-        return f"has the most {f['noun']} ({value:.0f})"
-    return f"has more {f['noun']} than most areas ({value:.0f})"
+        return f"has the most {f['noun']} {value:.0f}"
+    return f"has more {f['noun']} than most areas {value:.0f}"
 
 
 def bad_sentence(name, row, ranked):
@@ -152,12 +152,12 @@ def bad_sentence(name, row, ranked):
     col = f["column"]
     value = row[col]
     if f["kind"] == "commute":
-        return f"the commute is longer – about {value:.0f} minutes to {UNIVERSITY_NAME}."
+        return f"the commute is longer, about {value:.0f} minutes to {UNIVERSITY_NAME}."
     if f["kind"] == "rent":
-        return f"the rent is higher than in most areas (€{value:,.0f} a month)."
+        return f"the rent is higher than in most areas, €{value:,.0f} a month."
     if value == ranked[col].min():
-        return f"it has the fewest {f['noun']} of all the areas ({value:.0f})."
-    return f"it has fewer {f['noun']} than most areas ({value:.0f})."
+        return f"it has the fewest {f['noun']} of all the areas {value:.0f}."
+    return f"it has fewer {f['noun']} than most areas {value:.0f}."
 
 
 def short_name(name):
