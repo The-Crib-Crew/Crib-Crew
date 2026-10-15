@@ -1,9 +1,4 @@
-"""
-Web API for the Dublin area recommender.
 
-Run locally:   uvicorn app:app --reload        (from the Backend/api folder)
-Then open:     http://127.0.0.1:8000/docs      (interactive test page)
-"""
 from typing import Dict
 
 from fastapi import FastAPI, HTTPException
@@ -14,16 +9,15 @@ import recommender
 
 app = FastAPI(title="Crib Crew – Dublin Area Recommender API", version="1.0")
 
-# Let the frontend (on any domain) call this API from the browser.
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
-DATA = recommender.load_data()   # loaded once when the server starts
+DATA = recommender.load_data() 
 
 
 class RecommendRequest(BaseModel):
     budget: float = Field(..., gt=0, examples=[900])
-    accommodation: str = Field(..., examples=["private_room"],
-                               description="shared_room | private_room | one_bed | two_bed")
+      accommodation: str = Field(..., examples=["single_room"],
+                               description="single_room | double_room | studio | one_bed | two_bed | three_bed")
     ratings: Dict[str, int] = Field(
         ..., description="1 = Very important, 2 = Important, 3 = Slightly important, 4 = Not important",
         examples=[{"Rent": 1, "Commute": 2, "Supermarkets": 2, "Groceries": 2, "Restaurants": 3,
