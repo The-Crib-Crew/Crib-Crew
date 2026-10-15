@@ -51,7 +51,7 @@ Then go to http://127.0.0.1:8000/docs
 
 ## Deployment
 
-Every push to main redeploys it to Azure automatically (GitHub Actions). Startup command on Azure:
+Every push to main redeploys it to Azure automatically. Startup command on Azure:
 
 ```
 gunicorn --chdir Backend --bind=0.0.0.0:8000 -w 1 -k uvicorn.workers.UvicornWorker --timeout 120 app:app
