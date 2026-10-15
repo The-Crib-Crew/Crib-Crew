@@ -1,12 +1,11 @@
-# Backend API – Crib Crew recommender
+# Backend API 
 
-The notebook logic, turned into a web API the frontend can call.
 
 | File | What it does |
 |---|---|
-| `recommender.py` | Loads the data from `/Data` once and scores the areas (same logic as the notebook) |
+| `recommender.py` | Loads the data from `/Data` once and scores the areas |
 | `app.py` | The web API (FastAPI) |
-| `../../requirements.txt` | Python packages Azure installs (must stay at the repo root) |
+| `../../requirements.txt` | Python packages Azure installs |
 
 ## Endpoints
 
@@ -15,9 +14,9 @@ The notebook logic, turned into a web API the frontend can call.
 | GET | `/` | Health check – returns `{"status": "ok"}` |
 | GET | `/options` | Accommodation types, factor names and rating labels for building the form |
 | POST | `/recommend` | Returns the top 3 areas with explanations |
-| GET | `/docs` | Interactive test page (try requests in the browser) |
+| GET | `/docs` | Interactive test page |
 
-### Example request – `POST /recommend`
+### Example request, `POST /recommend`
 ```json
 {
   "budget": 900,
@@ -28,9 +27,9 @@ The notebook logic, turned into a web API the frontend can call.
 }
 ```
 `accommodation`: `shared_room`, `private_room`, `one_bed`, `two_bed`
-Ratings: 1 = Very important, 2 = Important, 3 = Slightly important, 4 = Not important (missing factors count as 4).
+Ratings: 1 = Very important, 2 = Important, 3 = Slightly important, 4 = Not important, missing factors will be counted as 4.
 
-### Example response (shortened)
+### Example response
 ```json
 {
   "compared": 6,
@@ -47,18 +46,18 @@ Ratings: 1 = Very important, 2 = Important, 3 = Slightly important, 4 = Not impo
 
 ## Run it on your own computer
 ```bash
-pip install -r requirements.txt        # from the repo root
+pip install -r requirements.txt 
 cd Backend/api
 uvicorn app:app --reload
 ```
-Open http://127.0.0.1:8000/docs
+open this link-> http://127.0.0.1:8000/docs
 
 ## Azure startup command
 ```
 gunicorn --chdir Backend/api --bind=0.0.0.0:8000 -w 1 -k uvicorn.workers.UvicornWorker --timeout 120 app:app
 ```
 
-## Calling it from the frontend (JavaScript)
+## Calling it from the frontend 
 ```js
 const res = await fetch("https://crib-crew-api.azurewebsites.net/recommend", {
   method: "POST",
