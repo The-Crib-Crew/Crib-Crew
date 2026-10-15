@@ -1,1 +1,0 @@
-District Profile frontend project files will be stored here.
