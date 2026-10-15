@@ -16,7 +16,7 @@ DATA = recommender.load_data()
 
 class RecommendRequest(BaseModel):
     budget: float = Field(..., gt=0, examples=[900])
-      accommodation: str = Field(..., examples=["single_room"],
+    accommodation: str = Field(..., examples=["single_room"],
                                description="single_room | double_room | studio | one_bed | two_bed | three_bed")
     ratings: Dict[str, int] = Field(
         ..., description="1 = Very important, 2 = Important, 3 = Slightly important, 4 = Not important",
